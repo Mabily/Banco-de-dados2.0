@@ -1,13 +1,13 @@
 # 🔷 Modelo Lógico -(SOS Chuvas):
 
-## Tabela: T_SW_USUARIO
+## Tabela: T_USUARIO
 - id_usuario (PK) — INTEGER
 - cpf — VARCHAR(11)
 - email — VARCHAR(255)
 - senha — VARCHAR(255)
 - dt_cadastro — TIMESTAMP
 
-## Tabela: T_SW_PESSOA_VULNERAVEL
+## Tabela: T_PESSOA_VULNERAVEL
 - id_pessoa (PK) — INTEGER
 - id_usuario (FK) — INTEGER
 - nm_pessoa — VARCHAR(200)
@@ -24,7 +24,7 @@
 - st_ativo — BOOLEAN
 - dt_ultima_atualizacao — TIMESTAMP
 
-## Tabela: T_SW_CONTATO_EMERGENCIA
+## Tabela: T_CONTATO_EMERGENCIA
 - id_contato (PK) — INTEGER
 - id_pessoa (FK) — INTEGER
 - nm_responsavel — VARCHAR(200)
@@ -33,7 +33,7 @@
 - ds_relacionamento — VARCHAR(50)
 - st_primario — BOOLEAN
 
-## Tabela: T_SW_ALERTA_METEOROLOGICO
+## Tabela: T_ALERTA_METEOROLOGICO
 - id_alerta (PK) — INTEGER
 - tp_alerta — VARCHAR(50)
 - ds_titulo — VARCHAR(255)
@@ -47,7 +47,7 @@
 - st_ativo — BOOLEAN
 - dt_criacao — TIMESTAMP
 
-## Tabela: T_SW_AREA_RISCO
+## Tabela: T_AREA_RISCO
 - id_area (PK) — INTEGER
 - nm_area — VARCHAR(255)
 - ds_localizacao — TEXT
@@ -59,7 +59,7 @@
 - st_ativo — BOOLEAN
 - dt_ultima_atualizacao — TIMESTAMP
 
-## Tabela: T_SW_RELATORIO_COMUNIDADE
+## Tabela: T_RELATORIO_COMUNIDADE
 - id_relatorio (PK) — INTEGER
 - id_usuario (FK) — INTEGER
 - tp_ocorrencia — VARCHAR(50)
@@ -73,7 +73,7 @@
 - dt_ocorrencia — TIMESTAMP
 - dt_criacao — TIMESTAMP
 
-## Tabela: T_SW_ROTA_SEGURA
+## Tabela: T_ROTA_SEGURA
 - id_rota (PK) — INTEGER
 - nm_origem — VARCHAR(255)
 - nm_destino — VARCHAR(255)
@@ -87,7 +87,7 @@
 - st_segura — BOOLEAN
 - dt_calculo — TIMESTAMP
 
-## Tabela: T_SW_EMERGENCIA
+## Tabela: T_EMERGENCIA
 - id_emergencia (PK) — INTEGER
 - id_usuario (FK) — INTEGER
 - id_pessoa_vulneravel (FK) — INTEGER
@@ -100,7 +100,7 @@
 - dt_atendimento — TIMESTAMP
 - dt_finalizacao — TIMESTAMP
 
-## Tabela: T_SW_HISTORICO_LOCALIZACAO
+## Tabela: T_HISTORICO_LOCALIZACAO
 - id_historico (PK) — INTEGER
 - id_pessoa_vulneravel (FK) — INTEGER
 - nr_latitude — DECIMAL(10,8)
