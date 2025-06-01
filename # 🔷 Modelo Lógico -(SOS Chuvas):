@@ -1,0 +1,109 @@
+# 🔷 Modelo Lógico -(SOS Chuvas):
+
+## Tabela: T_SW_USUARIO
+- id_usuario (PK) — INTEGER
+- cpf — VARCHAR(11)
+- senha — VARCHAR(255)
+- dt_cadastro — TIMESTAMP
+
+## Tabela: T_SW_PESSOA_VULNERAVEL
+- id_pessoa (PK) — INTEGER
+- id_usuario (FK) — INTEGER
+- nm_pessoa — VARCHAR(200)
+- nr_cpf — VARCHAR(11)
+- nr_cep — VARCHAR(8)
+- ds_logradouro — VARCHAR(300)
+- nr_endereco — VARCHAR(10)
+- ds_complemento — VARCHAR(100)
+- nm_bairro — VARCHAR(100)
+- nm_cidade — VARCHAR(100)
+- sg_uf — CHAR(2)
+- nr_telefone — VARCHAR(15)
+- tp_vulnerabilidade — VARCHAR(50)
+- st_ativo — BOOLEAN
+- dt_ultima_atualizacao — TIMESTAMP
+
+## Tabela: T_SW_CONTATO_EMERGENCIA
+- id_contato (PK) — INTEGER
+- id_pessoa (FK) — INTEGER
+- nm_responsavel — VARCHAR(200)
+- nr_cpf_responsavel — VARCHAR(11)
+- nr_telefone — VARCHAR(15)
+- ds_relacionamento — VARCHAR(50)
+- st_primario — BOOLEAN
+
+## Tabela: T_SW_ALERTA_METEOROLOGICO
+- id_alerta (PK) — INTEGER
+- tp_alerta — VARCHAR(50)
+- ds_titulo — VARCHAR(255)
+- ds_descricao — TEXT
+- nr_latitude — DECIMAL(10,8)
+- nr_longitude — DECIMAL(11,8)
+- vl_raio_km — DECIMAL(8,2)
+- dt_inicio — TIMESTAMP
+- dt_fim — TIMESTAMP
+- tp_severidade — VARCHAR(20)
+- st_ativo — BOOLEAN
+- dt_criacao — TIMESTAMP
+
+## Tabela: T_SW_AREA_RISCO
+- id_area (PK) — INTEGER
+- nm_area — VARCHAR(255)
+- ds_localizacao — TEXT
+- nr_latitude — DECIMAL(10,8)
+- nr_longitude — DECIMAL(11,8)
+- vl_raio_metros — DECIMAL(8,2)
+- tp_risco — VARCHAR(50)
+- nr_nivel_risco — INTEGER
+- st_ativo — BOOLEAN
+- dt_ultima_atualizacao — TIMESTAMP
+
+## Tabela: T_SW_RELATORIO_COMUNIDADE
+- id_relatorio (PK) — INTEGER
+- id_usuario (FK) — INTEGER
+- tp_ocorrencia — VARCHAR(50)
+- ds_titulo — VARCHAR(255)
+- ds_descricao — TEXT
+- nr_latitude — DECIMAL(10,8)
+- nr_longitude — DECIMAL(11,8)
+- tp_severidade — VARCHAR(20)
+- st_status — VARCHAR(30)
+- nr_votos_confirmacao — INTEGER
+- dt_ocorrencia — TIMESTAMP
+- dt_criacao — TIMESTAMP
+
+## Tabela: T_SW_ROTA_SEGURA
+- id_rota (PK) — INTEGER
+- nm_origem — VARCHAR(255)
+- nm_destino — VARCHAR(255)
+- nr_lat_origem — DECIMAL(10,8)
+- nr_lng_origem — DECIMAL(11,8)
+- nr_lat_destino — DECIMAL(10,8)
+- nr_lng_destino — DECIMAL(11,8)
+- ds_pontos_rota — JSON
+- vl_distancia_km — DECIMAL(8,2)
+- nr_tempo_estimado — INTEGER
+- st_segura — BOOLEAN
+- dt_calculo — TIMESTAMP
+
+## Tabela: T_SW_EMERGENCIA
+- id_emergencia (PK) — INTEGER
+- id_usuario (FK) — INTEGER
+- id_pessoa_vulneravel (FK) — INTEGER
+- tp_emergencia — VARCHAR(50)
+- ds_situacao — TEXT
+- nr_latitude — DECIMAL(10,8)
+- nr_longitude — DECIMAL(11,8)
+- st_status — VARCHAR(30)
+- dt_acionamento — TIMESTAMP
+- dt_atendimento — TIMESTAMP
+- dt_finalizacao — TIMESTAMP
+
+## Tabela: T_SW_HISTORICO_LOCALIZACAO
+- id_historico (PK) — INTEGER
+- id_pessoa_vulneravel (FK) — INTEGER
+- nr_latitude — DECIMAL(10,8)
+- nr_longitude — DECIMAL(11,8)
+- nr_precisao_metros — DECIMAL(8,2)
+- dt_localizacao — TIMESTAMP
+- tp_fonte — VARCHAR(30)
