@@ -1,0 +1,157 @@
+# 🔶 Modelo Físico - AlertaBrasil (SOS Chuvas) -SQL:
+
+```sql
+-- Tabela de usuários do sistema
+CREATE TABLE T_SW_USUARIO (
+    id_usuario SERIAL PRIMARY KEY,
+    cpf VARCHAR(11) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    dt_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de pessoas vulneráveis cadastradas
+CREATE TABLE T_SW_PESSOA_VULNERAVEL (
+    id_pessoa SERIAL PRIMARY KEY,
+    id_usuario INTEGER REFERENCES T_SW_USUARIO(id_usuario),
+    nm_pessoa VARCHAR(200) NOT NULL,
+    nr_cpf VARCHAR(11) UNIQUE NOT NULL,
+    nr_cep VARCHAR(8) NOT NULL,
+    ds_logradouro VARCHAR(300) NOT NULL,
+    nr_endereco VARCHAR(10),
+    ds_complemento VARCHAR(100),
+    nm_bairro VARCHAR(100) NOT NULL,
+    nm_cidade VARCHAR(100) NOT NULL,
+    sg_uf CHAR(2) NOT NULL,
+    nr_telefone VARCHAR(15) NOT NULL,
+    tp_vulnerabilidade VARCHAR(50) DEFAULT 'geral',
+    st_ativo BOOLEAN DEFAULT TRUE,
+    dt_ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de contatos de emergência
+CREATE TABLE T_SW_CONTATO_EMERGENCIA (
+    id_contato SERIAL PRIMARY KEY,
+    id_pessoa INTEGER REFERENCES T_SW_PESSOA_VULNERAVEL(id_pessoa),
+    nm_responsavel VARCHAR(200) NOT NULL,
+    nr_cpf_responsavel VARCHAR(11) NOT NULL,
+    nr_telefone VARCHAR(15) NOT NULL,
+    ds_relacionamento VARCHAR(50) NOT NULL,
+    st_primario BOOLEAN DEFAULT FALSE
+);
+
+-- Tabela de alertas meteorológicos
+CREATE TABLE T_SW_ALERTA_METEOROLOGICO (
+    id_alerta SERIAL PRIMARY KEY,
+    tp_alerta VARCHAR(50) NOT NULL,
+    ds_titulo VARCHAR(255) NOT NULL,
+    ds_descricao TEXT,
+    nr_latitude DECIMAL(10,8) NOT NULL,
+    nr_longitude DECIMAL(11,8) NOT NULL,
+    vl_raio_km DECIMAL(8,2) DEFAULT 5.0,
+    dt_inicio TIMESTAMP NOT NULL,
+    dt_fim TIMESTAMP,
+    tp_severidade VARCHAR(20) DEFAULT 'baixa',
+    st_ativo BOOLEAN DEFAULT TRUE,
+    dt_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de áreas de risco
+CREATE TABLE T_SW_AREA_RISCO (
+    id_area SERIAL PRIMARY KEY,
+    nm_area VARCHAR(255) NOT NULL,
+    ds_localizacao TEXT,
+    nr_latitude DECIMAL(10,8) NOT NULL,
+    nr_longitude DECIMAL(11,8) NOT NULL,
+    vl_raio_metros DECIMAL(8,2) DEFAULT 500.0,
+    tp_risco VARCHAR(50) NOT NULL,
+    nr_nivel_risco INTEGER DEFAULT 1 CHECK (nr_nivel_risco BETWEEN 1 AND 5),
+    st_ativo BOOLEAN DEFAULT TRUE,
+    dt_ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de relatórios da comunidade
+CREATE TABLE T_SW_RELATORIO_COMUNIDADE (
+    id_relatorio SERIAL PRIMARY KEY,
+    id_usuario INTEGER REFERENCES T_SW_USUARIO(id_usuario),
+    tp_ocorrencia VARCHAR(50) NOT NULL,
+    ds_titulo VARCHAR(255) NOT NULL,
+    ds_descricao TEXT,
+    nr_latitude DECIMAL(10,8) NOT NULL,
+    nr_longitude DECIMAL(11,8) NOT NULL,
+    tp_severidade VARCHAR(20) DEFAULT 'baixa',
+    st_status VARCHAR(30) DEFAULT 'ativo',
+    nr_votos_confirmacao INTEGER DEFAULT 0,
+    dt_ocorrencia TIMESTAMP NOT NULL,
+    dt_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de rotas seguras calculadas
+CREATE TABLE T_SW_ROTA_SEGURA (
+    id_rota SERIAL PRIMARY KEY,
+    nm_origem VARCHAR(255) NOT NULL,
+    nm_destino VARCHAR(255) NOT NULL,
+    nr_lat_origem DECIMAL(10,8) NOT NULL,
+    nr_lng_origem DECIMAL(11,8) NOT NULL,
+    nr_lat_destino DECIMAL(10,8) NOT NULL,
+    nr_lng_destino DECIMAL(11,8) NOT NULL,
+    ds_pontos_rota JSON,
+    vl_distancia_km DECIMAL(8,2),
+    nr_tempo_estimado INTEGER,
+    st_segura BOOLEAN DEFAULT TRUE,
+    dt_calculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de emergências acionadas
+CREATE TABLE T_SW_EMERGENCIA (
+    id_emergencia SERIAL PRIMARY KEY,
+    id_usuario INTEGER REFERENCES T_SW_USUARIO(id_usuario),
+    id_pessoa_vulneravel INTEGER REFERENCES T_SW_PESSOA_VULNERAVEL(id_pessoa),
+    tp_emergencia VARCHAR(50) NOT NULL,
+    ds_situacao TEXT,
+    nr_latitude DECIMAL(10,8) NOT NULL,
+    nr_longitude DECIMAL(11,8) NOT NULL,
+    st_status VARCHAR(30) DEFAULT 'acionada',
+    dt_acionamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dt_atendimento TIMESTAMP,
+    dt_finalizacao TIMESTAMP
+);
+
+-- Tabela de histórico de localização para rastreamento
+CREATE TABLE T_SW_HISTORICO_LOCALIZACAO (
+    id_historico SERIAL PRIMARY KEY,
+    id_pessoa_vulneravel INTEGER REFERENCES T_SW_PESSOA_VULNERAVEL(id_pessoa),
+    nr_latitude DECIMAL(10,8) NOT NULL,
+    nr_longitude DECIMAL(11,8) NOT NULL,
+    nr_precisao_metros DECIMAL(8,2),
+    dt_localizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    tp_fonte VARCHAR(30) DEFAULT 'gps'
+);
+
+-- Índices para otimização de consultas geoespaciais
+CREATE INDEX idx_pessoa_vulneravel_cpf ON T_SW_PESSOA_VULNERAVEL(nr_cpf);
+CREATE INDEX idx_pessoa_vulneravel_localização ON T_SW_PESSOA_VULNERAVEL(nm_cidade, nm_bairro);
+CREATE INDEX idx_alerta_geo ON T_SW_ALERTA_METEOROLOGICO(nr_latitude, nr_longitude);
+CREATE INDEX idx_area_risco_geo ON T_SW_AREA_RISCO(nr_latitude, nr_longitude);
+CREATE INDEX idx_relatorio_geo ON T_SW_RELATORIO_COMUNIDADE(nr_latitude, nr_longitude);
+CREATE INDEX idx_emergencia_status ON T_SW_EMERGENCIA(st_status, dt_acionamento);
+CREATE INDEX idx_historico_pessoa_data ON T_SW_HISTORICO_LOCALIZACAO(id_pessoa_vulneravel, dt_localizacao);
+
+-- Triggers para atualização automática de timestamps
+CREATE OR REPLACE FUNCTION atualizar_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.dt_ultima_atualizacao = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_pessoa_vulneravel_timestamp
+    BEFORE UPDATE ON T_SW_PESSOA_VULNERAVEL
+    FOR EACH ROW
+    EXECUTE FUNCTION atualizar_timestamp();
+
+CREATE TRIGGER trigger_area_risco_timestamp
+    BEFORE UPDATE ON T_SW_AREA_RISCO
+    FOR EACH ROW
+    EXECUTE FUNCTION atualizar_timestamp();
+```
